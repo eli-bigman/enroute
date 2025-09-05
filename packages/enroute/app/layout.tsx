@@ -4,11 +4,12 @@ import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
+import { Web3Provider } from "@/components/providers/web3-provider"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "EnRoute - Route money where it should go",
-  description: "Web3 dApp for programmable payments with ENS integration and Ghanaian futurism",
+  title: "EnRoute - ENS Payments",
+  description: "Web3 dApp for programmable payments with ENS integration",
   generator: "v0.app",
 }
 
@@ -20,7 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable} antialiased`}>
-        <Suspense fallback={null}>{children}</Suspense>
+        <Web3Provider>
+          <Suspense fallback={null}>{children}</Suspense>
+        </Web3Provider>
         <Analytics />
       </body>
     </html>

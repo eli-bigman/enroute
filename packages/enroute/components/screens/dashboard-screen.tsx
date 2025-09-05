@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +13,7 @@ interface DashboardScreenProps {
 }
 
 export function DashboardScreen({ userENS }: DashboardScreenProps) {
+  const { address } = useAccount()
   const [activeRules] = useState([
     {
       id: "1",
@@ -97,11 +99,19 @@ export function DashboardScreen({ userENS }: DashboardScreenProps) {
           <Card className="border-gray-800 bg-gray-900/50">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="border-emerald-500 text-emerald-500 bg-transparent">
-                    Your ENS
-                  </Badge>
-                  <span className="font-mono font-bold text-xl text-white">{userENS}</span>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="border-emerald-500 text-emerald-500 bg-transparent">
+                      Your ENS
+                    </Badge>
+                    <span className="font-mono font-bold text-xl text-white">{userENS}</span>
+                  </div>
+                  {address && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-500">Wallet:</span>
+                      <span className="font-mono text-gray-300 break-all">{address}</span>
+                    </div>
+                  )}
                 </div>
                 <Button
                   variant="outline"
