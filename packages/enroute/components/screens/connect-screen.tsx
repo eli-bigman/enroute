@@ -59,8 +59,13 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
         <div className="min-h-screen flex items-center justify-center p-4 bg-black">
           <div className="w-full max-w-md space-y-8">
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 bg-emerald-500 rounded-lg flex items-center justify-center mx-auto">
-                <div className="w-8 h-8 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              <div className="w-20 h-20 flex items-center justify-center mx-auto relative">
+                <img 
+                  src="/enroute-logo.svg" 
+                  alt="EnRoute" 
+                  className="w-full h-full"
+                />
+                <div className="absolute inset-0 w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mx-auto my-auto" />
               </div>
               <div className="space-y-3">
                 <h1 className="text-4xl font-bold text-white text-balance">Loading...</h1>
@@ -92,14 +97,19 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
           <div className="w-full max-w-md space-y-8">
             {/* User Profile Header */}
             <div className="text-center space-y-6">
-              <div className="w-20 h-20 bg-emerald-500 rounded-lg flex items-center justify-center mx-auto">
-                <span className="text-3xl font-bold text-black">{registration.username.charAt(0).toUpperCase()}</span>
+              <div className="w-20 h-20 flex items-center justify-center mx-auto">
+                <img 
+                  src="/enroute-logo.svg" 
+                  alt="EnRoute" 
+                  className="w-full h-full"
+                />
               </div>
 
               <div className="space-y-3">
                 <h1 className="text-4xl font-bold text-white text-balance">Welcome back!</h1>
                 <p className="text-xl text-emerald-400 text-balance">{registration.username}.enrouteapp.eth</p>
-                <p className="text-sm text-gray-400 text-balance">Connected to {getNetworkName(chainId)}</p>
+                <p className="text-lg text-gray-400 text-balance">Route money where it should go</p>
+                <p className="text-sm text-gray-500 text-balance">Connected to {getNetworkName(chainId)}</p>
               </div>
             </div>
 
@@ -165,13 +175,17 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
       <div className="w-full max-w-md space-y-8">
         {/* Logo and Title */}
         <div className="text-center space-y-6">
-          <div className="w-20 h-20 bg-emerald-500 rounded-lg flex items-center justify-center mx-auto">
-            <span className="text-3xl font-bold text-black">E</span>
+          <div className="w-20 h-20 flex items-center justify-center mx-auto">
+            <img 
+              src="/enroute-logo.svg" 
+              alt="EnRoute" 
+              className="w-full h-full"
+            />
           </div>
 
           <div className="space-y-3">
             <h1 className="text-4xl font-bold text-white text-balance">EnRoute</h1>
-            <p className="text-xl text-gray-400 text-balance">Route money where it should go</p>
+            <p className="text-xl text-gray-400 text-balance">Route money where it should go!</p>
             <p className="text-sm text-gray-500 max-w-sm mx-auto text-balance">
               Connect your wallet to start creating custom payment routing policies with ENS integration
             </p>

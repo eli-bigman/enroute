@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
+import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,8 +11,6 @@ import {
   Settings,
   Wallet,
   Globe,
-  Moon,
-  Sun,
   Shield,
   Fingerprint,
   Key,
@@ -20,32 +19,36 @@ import {
   Bell,
   HelpCircle,
   Info,
+  Copy,
+  CheckCircle,
 } from "lucide-react"
 
 interface SettingsScreenProps {
+  userENS: string | null
   onDisconnect: () => void
 }
 
-export function SettingsScreen({ onDisconnect }: SettingsScreenProps) {
-  const [isDarkMode, setIsDarkMode] = useState(true)
-  const [selectedLanguage, setSelectedLanguage] = useState("en")
+export function SettingsScreen({ userENS, onDisconnect }: SettingsScreenProps) {
+  const { address, connector } = useAccount()
   const [biometricAuth, setBiometricAuth] = useState(false)
   const [twoFactorAuth, setTwoFactorAuth] = useState(true)
   const [notifications, setNotifications] = useState(true)
   const [autoBackup, setAutoBackup] = useState(true)
-
-  const languages = [
-    { code: "en", name: "English", native: "English" },
-    { code: "tw", name: "Twi", native: "Twi" },
-    { code: "ga", name: "Ga", native: "Ga" },
-    { code: "ee", name: "Ewe", native: "Eʋegbe" },
-  ]
+  const [addressCopied, setAddressCopied] = useState(false)
 
   const handleDisconnect = () => {
     if (
       confirm("Are you sure you want to disconnect your wallet? You'll need to reconnect to access your ENS policies.")
     ) {
       onDisconnect()
+    }
+  }
+
+  const copyAddress = async () => {
+    if (address) {
+      await navigator.clipboard.writeText(address)
+      setAddressCopied(true)
+      setTimeout(() => setAddressCopied(false), 2000)
     }
   }
 
@@ -80,17 +83,39 @@ export function SettingsScreen({ onDisconnect }: SettingsScreenProps) {
                   <Wallet className="h-4 w-4 text-black" />
                 </div>
                 <div>
-                  <p className="font-medium text-white">MetaMask</p>
-                  <p className="text-sm text-gray-400">0x742d...3b8D4</p>
+                  <p className="font-medium text-white">{connector?.name || 'Wallet'}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm text-gray-400 font-mono">
+                      {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Not connected'}
+                    </p>
+                    {address && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-5 w-5 p-0 text-gray-400 hover:text-white"
+                        onClick={copyAddress}
+                      >
+                        {addressCopied ? (
+                          <CheckCircle className="h-3 w-3" />
+                        ) : (
+                          <Copy className="h-3 w-3" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
               <Badge className="bg-emerald-500 text-black hover:bg-emerald-600">Connected</Badge>
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800">
+              <Button 
+                variant="outline" 
+                className="flex-1 bg-transparent border-gray-700 text-white hover:bg-gray-800"
+                onClick={() => address && window.open(`https://sepolia.basescan.org/address/${address}`, '_blank')}
+              >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                View on Etherscan
+                View on BaseScan
               </Button>
               <Button variant="destructive" onClick={handleDisconnect} className="flex-1 bg-red-600 hover:bg-red-700">
                 <LogOut className="h-4 w-4 mr-2" />
@@ -111,71 +136,28 @@ export function SettingsScreen({ onDisconnect }: SettingsScreenProps) {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
               <div>
-                <p className="font-medium font-mono text-white">alice.enroute.eth</p>
-                <p className="text-sm text-gray-400">Primary ENS for routing policies</p>
+                <p className="font-medium font-mono text-white">
+                  {userENS || 'No ENS connected'}
+                </p>
+                <p className="text-sm text-gray-400">
+                  {userENS ? 'Primary ENS for routing policies' : 'Connect an ENS to use EnRoute features'}
+                </p>
               </div>
-              <Badge variant="outline" className="border-emerald-500 text-emerald-500">
-                Active
+              <Badge 
+                variant={userENS ? "default" : "outline"} 
+                className={userENS ? "bg-emerald-500 text-black" : "border-gray-600 text-gray-400"}
+              >
+                {userENS ? 'Active' : 'Not Set'}
               </Badge>
             </div>
 
-            <Button variant="outline" className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800">
-              Change Linked ENS
+            <Button 
+              variant="outline" 
+              className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800"
+              disabled={!userENS}
+            >
+              {userENS ? 'Change Linked ENS' : 'Set Up ENS'}
             </Button>
-          </CardContent>
-        </Card>
-
-        {/* Appearance */}
-        <Card className="bg-gray-900/50 border-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              {isDarkMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              Appearance
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-white">Dark Mode</p>
-                <p className="text-sm text-gray-400">Toggle between light and dark themes</p>
-              </div>
-              <Switch checked={isDarkMode} onCheckedChange={setIsDarkMode} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Language */}
-        <Card className="bg-gray-900/50 border-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Globe className="h-5 w-5" />
-              Language & Region
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-2">
-              {languages.map((language) => (
-                <Button
-                  key={language.code}
-                  variant={selectedLanguage === language.code ? "default" : "outline"}
-                  className={`justify-start ${
-                    selectedLanguage === language.code
-                      ? "bg-emerald-500 text-black hover:bg-emerald-600"
-                      : "bg-transparent border-gray-700 text-white hover:bg-gray-800"
-                  }`}
-                  onClick={() => setSelectedLanguage(language.code)}
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <span>{language.name}</span>
-                    <span
-                      className={`text-sm ${selectedLanguage === language.code ? "text-black/70" : "text-gray-400"}`}
-                    >
-                      {language.native}
-                    </span>
-                  </div>
-                </Button>
-              ))}
-            </div>
           </CardContent>
         </Card>
 

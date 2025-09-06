@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Home, Settings, Wallet, FileText, Send, History, Store, Menu, X } from "lucide-react"
@@ -18,7 +18,6 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "policy-builder", label: "Policy Builder", icon: FileText },
     { id: "send", label: "Send", icon: Send },
-    { id: "transactions", label: "Transactions", icon: History },
     { id: "marketplace", label: "Marketplace", icon: Store },
     { id: "settings", label: "Settings", icon: Settings },
   ]
@@ -29,8 +28,12 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-black border-b border-gray-800">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
-              <span className="text-black font-bold text-sm">E</span>
+            <div className="w-8 h-8 flex items-center justify-center">
+              <img 
+                src="/enroute-logo.svg" 
+                alt="EnRoute" 
+                className="w-full h-full"
+              />
             </div>
             <span className="font-bold text-lg text-white">EnRoute</span>
           </div>
@@ -80,12 +83,16 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
       <div className="hidden md:flex fixed left-0 top-0 h-full w-64 bg-black border-r border-gray-800 flex-col">
         <div className="p-6 border-b border-gray-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
-              <span className="text-black font-bold text-lg">E</span>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <img 
+                src="/enroute-logo.svg" 
+                alt="EnRoute" 
+                className="w-full h-full"
+              />
             </div>
             <div>
               <h1 className="font-bold text-xl text-white">EnRoute</h1>
-              <p className="text-sm text-gray-400">Route money where it should go</p>
+              <p className="text-sm text-gray-400">Distributed Payment with ENS</p>
             </div>
           </div>
         </div>

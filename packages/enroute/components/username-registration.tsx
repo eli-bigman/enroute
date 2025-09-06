@@ -44,8 +44,12 @@ export function UsernameRegistration({ onRegister, isRegistering, error }: Usern
     <div className="w-full max-w-md space-y-6">
       {/* Header */}
       <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-emerald-500 rounded-lg flex items-center justify-center mx-auto">
-          <User className="h-8 w-8 text-black" />
+        <div className="w-16 h-16 flex items-center justify-center mx-auto">
+          <img 
+            src="/enroute-logo.svg" 
+            alt="EnRoute" 
+            className="w-full h-full"
+          />
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-white">Choose Your Username</h2>

@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useAccount, useSendTransaction } from "wagmi"
-import { parseEther } from "viem"
+import { useAccount } from "wagmi"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Send, CheckCircle, ArrowRight, Search, AlertCircle, Loader2, Wallet, Target } from "lucide-react"
 import { useUserPoliciesDetailed } from "@/hooks/use-enroute-contracts"
 import { useToast } from "@/hooks/use-toast"
 
@@ -22,9 +22,6 @@ export function SendScreen({ userENS }: SendScreenProps) {
   // Real data hooks
   const { policies, isLoading: policiesLoading } = useUserPoliciesDetailed(address)
   
-  // Web3 transaction hook
-  const { sendTransaction, isPending: isTransactionPending, isSuccess, isError, error } = useSendTransaction()
-  
   // Form state
   const [selectedENS, setSelectedENS] = useState("")
   const [amount, setAmount] = useState("")
@@ -32,6 +29,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
   const [isResolving, setIsResolving] = useState(false)
   const [resolvedPolicy, setResolvedPolicy] = useState<any>(null)
   const [resolutionError, setResolutionError] = useState("")
+  const [isSending, setIsSending] = useState(false)
 
   const tokens = [
     { symbol: "ETH", name: "Ethereum", decimals: 18 },
@@ -42,13 +40,6 @@ export function SendScreen({ userENS }: SendScreenProps) {
 
   // ENS resolution simulation (in real app, this would call ENS resolver)
   const resolveENS = async (ensName: string) => {
-    console.log("🔍 ENS Resolution Debug:", {
-      ensName,
-      userENS,
-      currentUserFromENS: userENS ? userENS.split('.')[0] : null,
-      policies: policies?.map(p => ({ name: p.name, active: p.active }))
-    })
-    
     setIsResolving(true)
     setResolutionError("")
     setResolvedPolicy(null)
@@ -77,16 +68,6 @@ export function SendScreen({ userENS }: SendScreenProps) {
         throw new Error("ENS name must end with .enrouteapp.eth")
       }
       
-      // Validate that the username matches the current user's ENS
-      const currentUsername = userENS ? userENS.split('.')[0] : null
-      if (!currentUsername) {
-        throw new Error("No user ENS available. Please connect your wallet.")
-      }
-      
-      if (username !== currentUsername) {
-        throw new Error(`You can only send to your own policies. Use: ${subname}.${currentUsername}.enrouteapp.eth`)
-      }
-      
       // Find matching policy
       const matchingPolicy = policies.find(policy => 
         policy.name.toLowerCase() === subname.toLowerCase() && 
@@ -101,7 +82,18 @@ export function SendScreen({ userENS }: SendScreenProps) {
       const mockPolicyDetails = {
         ...matchingPolicy,
         fullENS: ensName,
-        recipients: [],
+        recipients: [
+          { 
+            address: "0x38269215091e4fFf0DE6E0bd4DDF7e82d11f8957", 
+            percentage: 50, 
+            label: "Main Account" 
+          },
+          { 
+            address: "0x101Fd5E95a397A43E7C102Cf4E0870B1174dAAf9", 
+            percentage: 50, 
+            label: "Savings Account" 
+          }
+        ],
         acceptedTokens: ["ETH", "USDC", "USDT", "DAI"],
         minAmount: "0.001"
       }
@@ -130,7 +122,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
   }, [selectedENS, policies])
 
   const handleSend = async () => {
-    if (!resolvedPolicy || !amount || !address) {
+    if (!resolvedPolicy || !amount) {
       toast({
         title: "Missing Information",
         description: "Please enter a valid ENS name and amount",
@@ -139,68 +131,43 @@ export function SendScreen({ userENS }: SendScreenProps) {
       return
     }
 
+    setIsSending(true)
+    
     try {
-      // Convert amount to wei for ETH transactions
-      const value = parseEther(amount)
+      // Simulate transaction
+      await new Promise(resolve => setTimeout(resolve, 2000))
       
-      // Send transaction to the policy contract address
-      sendTransaction({
-        to: resolvedPolicy.policyContract as `0x${string}`,
-        value: value,
-        // For ETH transfers to a policy contract, we send to the contract address
-        // The policy contract should handle the distribution automatically
-      })
-      
-      toast({
-        title: "Transaction Submitted",
-        description: `Sending ${amount} ${selectedToken} to ${resolvedPolicy.fullENS}`,
-      })
-      
-    } catch (error) {
-      console.error("Transaction error:", error)
-      toast({
-        title: "Transaction Failed", 
-        description: "Please try again",
-        variant: "destructive",
-      })
-    }
-  }
-
-  // Handle transaction completion
-  useEffect(() => {
-    if (isSuccess) {
       toast({
         title: "Payment Sent Successfully!",
-        description: `${amount} ${selectedToken} sent to ${resolvedPolicy?.fullENS}`,
+        description: `${amount} ${selectedToken} sent to ${resolvedPolicy.fullENS}`,
       })
       
       // Reset form
       setAmount("")
       setSelectedENS("")
       setResolvedPolicy(null)
-    }
-  }, [isSuccess])
-
-  useEffect(() => {
-    if (isError && error) {
+      
+    } catch (error) {
       toast({
         title: "Transaction Failed",
-        description: error.message || "Please try again",
+        description: "Please try again",
         variant: "destructive",
       })
+    } finally {
+      setIsSending(false)
     }
-  }, [isError, error])
+  }
 
   const isValidAmount = amount && parseFloat(amount) > 0
-  const canSend = resolvedPolicy && isValidAmount && !isTransactionPending
+  const canSend = resolvedPolicy && isValidAmount && !isSending
 
   return (
     <div className="min-h-screen bg-black p-4 space-y-6">
       {/* Header */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
-            <span className="text-black text-lg">💸</span>
+          <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+            <Send className="h-5 w-5 text-black" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Send Payment</h1>
@@ -216,7 +183,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
           <Card className="border-gray-800 bg-gray-900/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
-                <span className="text-emerald-500">🎯</span>
+                <Target className="h-5 w-5 text-blue-500" />
                 Recipient ENS
               </CardTitle>
             </CardHeader>
@@ -224,38 +191,38 @@ export function SendScreen({ userENS }: SendScreenProps) {
               <div className="space-y-2">
                 <div className="relative">
                   <Input
-                    placeholder={userENS ? `savings.${userENS}` : "savings.username.enrouteapp.eth"}
+                    placeholder="savings.username.enrouteapp.eth"
                     value={selectedENS}
                     onChange={(e) => setSelectedENS(e.target.value)}
                     className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 text-lg h-12 pr-12"
                   />
                   <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
                     {isResolving ? (
-                      <span className="text-emerald-500">⏳</span>
+                      <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
                     ) : selectedENS ? (
                       resolvedPolicy ? (
-                        <span className="text-emerald-500">✅</span>
+                        <CheckCircle className="h-5 w-5 text-emerald-500" />
                       ) : resolutionError ? (
-                        <span className="text-red-500">❌</span>
+                        <AlertCircle className="h-5 w-5 text-red-500" />
                       ) : (
-                        <span className="text-gray-500">🔍</span>
+                        <Search className="h-5 w-5 text-gray-500" />
                       )
                     ) : (
-                      <span className="text-gray-500">🔍</span>
+                      <Search className="h-5 w-5 text-gray-500" />
                     )}
                   </div>
                 </div>
                 
                 {resolutionError && (
                   <div className="flex items-center gap-2 text-red-400 text-sm">
-                    <span>❌</span>
+                    <AlertCircle className="h-4 w-4" />
                     <span>{resolutionError}</span>
                   </div>
                 )}
                 
                 {resolvedPolicy && (
                   <div className="flex items-center gap-2 text-emerald-400 text-sm">
-                    <span>✅</span>
+                    <CheckCircle className="h-4 w-4" />
                     <span>Policy found and active</span>
                   </div>
                 )}
@@ -270,10 +237,10 @@ export function SendScreen({ userENS }: SendScreenProps) {
                       <Badge
                         key={index}
                         variant="outline"
-                        className="cursor-pointer border-gray-600 text-gray-400 hover:border-emerald-500 hover:text-emerald-400"
-                        onClick={() => setSelectedENS(`${policy.name}.${userENS || 'username.enrouteapp.eth'}`)}
+                        className="cursor-pointer border-gray-600 text-gray-400 hover:border-blue-500 hover:text-blue-400"
+                        onClick={() => setSelectedENS(`${policy.name}.${userENS}`)}
                       >
-                        {policy.name}.{userENS || 'username.enrouteapp.eth'}
+                        {policy.name}.{userENS}
                       </Badge>
                     ))}
                   </div>
@@ -286,7 +253,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
           <Card className="border-gray-800 bg-gray-900/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-white">
-                <span className="text-emerald-500">💰</span>
+                <Wallet className="h-5 w-5 text-blue-500" />
                 Amount
               </CardTitle>
             </CardHeader>
@@ -302,8 +269,8 @@ export function SendScreen({ userENS }: SendScreenProps) {
                       onClick={() => setSelectedToken(token.symbol)}
                       className={
                         selectedToken === token.symbol
-                          ? "bg-emerald-500 text-black hover:bg-emerald-600"
-                          : "bg-transparent border-gray-600 text-gray-300 hover:border-emerald-500 hover:text-emerald-400"
+                          ? "bg-blue-500 text-black hover:bg-blue-600"
+                          : "bg-transparent border-gray-600 text-gray-300 hover:border-blue-500 hover:text-blue-400"
                       }
                     >
                       {token.symbol}
@@ -335,7 +302,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => setAmount(quickAmount)}
-                      className="bg-transparent border-gray-600 text-gray-300 hover:border-emerald-500 hover:text-emerald-400"
+                      className="bg-transparent border-gray-600 text-gray-300 hover:border-blue-500 hover:text-blue-400"
                     >
                       {quickAmount}
                     </Button>
@@ -349,16 +316,16 @@ export function SendScreen({ userENS }: SendScreenProps) {
           <Button
             onClick={handleSend}
             disabled={!canSend}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-black text-lg h-14 disabled:bg-gray-700 disabled:text-gray-400"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-black text-lg h-14 disabled:bg-gray-700 disabled:text-gray-400"
           >
-            {isTransactionPending ? (
+            {isSending ? (
               <>
-                <span className="mr-2">⏳</span>
+                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                 Sending...
               </>
             ) : (
               <>
-                <span className="mr-2">💸</span>
+                <Send className="h-5 w-5 mr-2" />
                 Send Payment
               </>
             )}
@@ -371,7 +338,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
             <Card className="border-gray-800 bg-gray-900/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <span className="text-emerald-500">✅</span>
+                  <CheckCircle className="h-5 w-5 text-emerald-500" />
                   Policy Preview
                 </CardTitle>
               </CardHeader>
@@ -389,7 +356,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
                     {resolvedPolicy.recipients.map((recipient: any, index: number) => (
                       <div key={index} className="flex items-center justify-between py-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-emerald-500">→</span>
+                          <ArrowRight className="h-4 w-4 text-blue-500" />
                           <div>
                             <p className="text-sm text-white">{recipient.label}</p>
                             <p className="text-xs text-gray-500 font-mono">
@@ -434,7 +401,7 @@ export function SendScreen({ userENS }: SendScreenProps) {
             <Card className="border-gray-800 bg-gray-900/50">
               <CardContent className="p-8 text-center">
                 <div className="space-y-3">
-                  <span className="text-6xl text-gray-600">🔍</span>
+                  <Search className="h-12 w-12 text-gray-600 mx-auto" />
                   <h3 className="text-lg font-medium text-gray-400">Enter ENS Name</h3>
                   <p className="text-gray-500">
                     Enter a valid ENS name to see the policy details and payment distribution

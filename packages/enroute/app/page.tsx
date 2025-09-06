@@ -7,7 +7,6 @@ import { ConnectScreen } from "@/components/screens/connect-screen"
 import { PolicyBuilderScreen } from "@/components/screens/policy-builder-screen"
 import { DashboardScreen } from "@/components/screens/dashboard-screen"
 import { SendScreen } from "@/components/screens/send-screen"
-import { TransactionsScreen } from "@/components/screens/transactions-screen"
 import { MarketplaceScreen } from "@/components/screens/marketplace-screen"
 import { SettingsScreen } from "@/components/screens/settings-screen"
 
@@ -45,16 +44,15 @@ export default function EnRouteApp() {
       case "policy-builder":
         return <PolicyBuilderScreen userENS={userENS} />
       case "dashboard":
-        return <DashboardScreen userENS={userENS} />
+        return <DashboardScreen userENS={userENS} onScreenChange={setCurrentScreen} />
       case "send":
-        return <SendScreen />
-      case "transactions":
-        return <TransactionsScreen userENS={userENS} />
+        return <SendScreen userENS={userENS} />
       case "marketplace":
         return <MarketplaceScreen userENS={userENS} onScreenChange={setCurrentScreen} />
       case "settings":
         return (
           <SettingsScreen
+            userENS={userENS}
             onDisconnect={() => {
               setUsername("")
               setUserENS(null)

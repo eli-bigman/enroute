@@ -11,6 +11,18 @@ export const metadata: Metadata = {
   title: "EnRoute - ENS Payments",
   description: "Web3 dApp for programmable payments with ENS integration",
   generator: "v0.app",
+  icons: {
+    icon: [
+      {
+        url: "/favicon.svg",
+        type: "image/svg+xml",
+      },
+      {
+        url: "/favicon.ico",
+        type: "image/x-icon",
+      },
+    ],
+  },
 }
 
 export default function RootLayout({
