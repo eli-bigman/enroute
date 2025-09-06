@@ -94,45 +94,46 @@ NEXT_PUBLIC_ENS_DOMAIN=enrouteapp.eth
 
 ---
 
-## Phase 2: ENS Domain Setup (Automated with Durin.dev)
+## Phase 2: ENS Domain Setup
 
-### Step 1: Visit Durin.dev
-1. **Go to [durin.dev](https://durin.dev)**
-   - Connect your wallet (use test wallet for development)
-   - This will automate the entire ENS infrastructure setup
+### Option A: Using Durin.dev (Recommended for Testing)
 
-### Step 2: Select Domain & Chain
-1. **Choose ENS Name:**
-   - For testing: Use `enrouteapp.eth` on Sepolia testnet (free)
-   - For production: Use `enrouteapp.eth` on mainnet (requires registration)
+1. **Visit Durin.dev**
+   - Go to [durin.dev](https://durin.dev)
+   - Connect your wallet
+   - **This can automate steps 1-4 of the manual process below**
 
-2. **Select Target Chain:**
-   - Choose "Base Sepolia" for testing
-   - Choose "Base Mainnet" for production
+2. **Select Domain & Chain**
+   - Choose your ENS name (or use a test domain)
+   - Select "Base Sepolia" as target chain
+   - Click "Deploy Registry"
 
-### Step 3: Deploy L2 Registry (Automated)
-1. **Click "Deploy Registry"**
-   - Durin.dev will deploy the L2Registry contract automatically
-   - This handles all the complex ENS L2 infrastructure
+3. **Deploy L2 Registry**
+   - Durin.dev will deploy the L2Registry contract for you
    - Copy the deployed registry address to your `.env` files
 
-### Step 4: Configure L1 Resolver (Automated)
-1. **Update Resolver**
+4. **Configure L1 Resolver**
    - Durin.dev will guide you through updating your ENS resolver
-   - This connects your ENS name to the deployed L2 registry
-   - Required for ENS resolution to work
+   - This connects your ENS name to the L2 registry
 
-### Step 5: Get ENS Node Hash
+### Option B: Manual ENS Setup
+
+#### Get ENS Domain:
+**For Production:**
+1. Go to [app.ens.domains](https://app.ens.domains)
+2. Search and register `enrouteapp.eth` (~$640/year)
+
+**For Development:**
+1. Use a subdomain of an existing ENS you own
+2. Or use `test.eth` for local development
+
+#### Get ENS Node Hash:
 ```javascript
 // In browser console or Node.js
 const { namehash } = require('@ensdomains/ensjs/utils/normalise');
 console.log(namehash('enrouteapp.eth'));
-// Copy this hash to NEXT_PUBLIC_BASE_NODE in your .env
+// Copy this hash to NEXT_PUBLIC_BASE_NODE
 ```
-
-**Note:** If you don't own `enrouteapp.eth` yet:
-- **Testnet:** Register it for free on Sepolia at [app.ens.domains](https://app.ens.domains)
-- **Mainnet:** Register it (~$640/year) at [app.ens.domains](https://app.ens.domains)
 
 ---
 
@@ -182,19 +183,39 @@ forge test
 
 ---
 
-## Phase 4: Contract Deployment (Using Durin.dev + Custom Extensions)
+## Phase 4: Contract Deployment
 
-### Step 1: Use Durin.dev for Base Infrastructure
-1. **Complete durin.dev Setup**
-   - Follow Phase 2 to deploy L2Registry via durin.dev
-   - This gives you the foundational ENS infrastructure
-   - Copy the L2Registry address from durin.dev
+### Option A: Using Durin.dev (Partially Automated)
 
-### Step 2: Deploy EnRoute Custom Contracts
+1. **Use Durin.dev for Base Registry**
+   - Complete steps 1-4 on durin.dev
+   - This gives you the L2Registry address
+
+2. **Deploy EnRoute Extensions Manually**
+   ```bash
+   cd packages/durin
+   
+   # Deploy your custom contracts
+   forge script scripts/DeployEnRoute.s.sol \
+     --rpc-url $L2_RPC_URL \
+     --private-key $PRIVATE_KEY \
+     --broadcast \
+     --verify
+   ```
+
+### Option B: Full Manual Deployment
+
 ```bash
 cd packages/durin
 
-# Deploy your EnRoute-specific extensions
+# 1. Deploy base L2 contracts
+forge script scripts/DeployL2Contracts.s.sol \
+  --rpc-url $L2_RPC_URL \
+  --private-key $PRIVATE_KEY \
+  --broadcast \
+  --verify
+
+# 2. Deploy EnRoute extensions
 forge script scripts/DeployEnRoute.s.sol \
   --rpc-url $L2_RPC_URL \
   --private-key $PRIVATE_KEY \
@@ -202,15 +223,8 @@ forge script scripts/DeployEnRoute.s.sol \
   --verify
 ```
 
-### Step 3: Connect Registrar to Registry (via Durin.dev)
-1. **Return to durin.dev**
-2. **Follow steps 3-4 on the platform:**
-   - Customize and deploy L2 Registrar
-   - Connect registrar to registry
-3. **This completes the automated setup**
-
-### Step 4: Update Environment Variables
-After deployment, update both `.env` files with all deployed contract addresses:
+### Step 3: Update Environment Variables
+After deployment, update both `.env` files with the deployed contract addresses.
 
 ---
 
@@ -304,14 +318,14 @@ dig schoolfees.alice.enrouteapp.eth
 ## Quick Start Summary
 
 1. **Setup:** Install Foundry, get API keys, setup env files
-2. **Domain:** Use durin.dev to deploy L2 registry and configure ENS (fully automated)
-3. **Contracts:** Create and deploy EnRoute-specific contract extensions
+2. **Domain:** Use durin.dev to deploy L2 registry (automated)
+3. **Contracts:** Create and deploy EnRoute-specific contracts
 4. **Frontend:** Integrate contracts with React hooks
 5. **Test:** Verify username and policy creation works
 6. **Deploy:** Move to Base mainnet for production
 
-**Estimated Time:** 1-2 hours for full setup with durin.dev automation
+**Estimated Time:** 2-4 hours for full setup (depending on ENS domain acquisition)
 
 ---
 
-*This guide uses durin.dev for all ENS infrastructure setup, which automates the complex L1 resolver configuration, L2 registry deployment, and registrar connection. You only need to focus on building the EnRoute-specific features: automatic registration, policy contracts, and payment logic.*
+*This guide assumes you'll use durin.dev for the base ENS infrastructure setup, which automates the complex L1 resolver configuration. Focus your custom development on the EnRoute-specific features: automatic registration, policy contracts, and payment logic.*
