@@ -80,14 +80,20 @@ export function useRegisterUser() {
     hash,
   })
 
-  const registerUser = (username: string) => {
-    writeContract({
-      address: CONTRACTS.ENROUTE_REGISTRY,
-      abi: ENROUTE_REGISTRY_ABI,
-      functionName: 'selfRegister',
-      args: [username], // Only username needed for self-registration
-      gas: BigInt(500000), // Set explicit gas limit
-    })
+  const registerUser = async (username: string) => {
+    try {
+      await writeContract({
+        address: CONTRACTS.ENROUTE_REGISTRY,
+        abi: ENROUTE_REGISTRY_ABI,
+        functionName: 'selfRegister',
+        args: [username],
+        // Let wagmi estimate gas automatically for better accuracy
+        gas: undefined,
+      })
+    } catch (err) {
+      console.error('Registration error:', err)
+      throw err
+    }
   }
 
   return {

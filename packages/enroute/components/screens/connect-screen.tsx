@@ -8,7 +8,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Wallet, LogOut, Network } from "lucide-react"
 import { UsernameRegistration } from "@/components/username-registration"
 import { useUserRegistration } from "@/hooks/use-user-registration"
-import { DebugRegistration } from "@/components/debug-registration"
 import { AccountCreationCountdown } from "@/components/account-creation-countdown"
 
 interface ConnectScreenProps {
@@ -101,7 +100,6 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-black">
           <div className="w-full max-w-md space-y-6">
-            <DebugRegistration />
             <UsernameRegistration
               onRegister={registration.register}
               isRegistering={registration.isRegistering}
