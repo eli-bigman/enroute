@@ -1,0 +1,27 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install",
+  "devCommand": "pnpm run dev",
+  "outputDirectory": ".next",
+  "functions": {
+    "app/**": {
+      "includeFiles": "public/**"
+    }
+  },
+  "env": {
+    "NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID": "@wallet_connect_project_id",
+    "NEXT_PUBLIC_L2_RPC_URL": "@l2_rpc_url",
+    "NEXT_PUBLIC_CHAIN_ID": "@chain_id",
+    "NEXT_PUBLIC_BASESCAN_API_KEY": "@basescan_api_key",
+    "NEXT_PUBLIC_ENROUTE_REGISTRY_ADDRESS": "@enroute_registry_address",
+    "NEXT_PUBLIC_POLICY_FACTORY_ADDRESS": "@policy_factory_address",
+    "NEXT_PUBLIC_SCHOOL_FEES_IMPL": "@school_fees_impl",
+    "NEXT_PUBLIC_SAVINGS_IMPL": "@savings_impl",
+    "NEXT_PUBLIC_SPLIT_PAYMENT_IMPL": "@split_payment_impl",
+    "NEXT_PUBLIC_SIMPLE_SPLIT_IMPL": "@simple_split_impl",
+    "NEXT_PUBLIC_L2_REGISTRY_ADDRESS": "@l2_registry_address",
+    "NEXT_PUBLIC_ENS_DOMAIN": "@ens_domain",
+    "NEXT_PUBLIC_BASE_NODE": "@base_node"
+  }
+}
