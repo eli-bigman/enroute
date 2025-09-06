@@ -10,7 +10,6 @@ import { Separator } from "@/components/ui/separator"
 import {
   Settings,
   Wallet,
-  Globe,
   Shield,
   Fingerprint,
   Key,
@@ -122,42 +121,6 @@ export function SettingsScreen({ userENS, onDisconnect }: SettingsScreenProps) {
                 Disconnect
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* ENS Management */}
-        <Card className="bg-gray-900/50 border-gray-800">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
-              <Globe className="h-5 w-5" />
-              ENS Manager
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700">
-              <div>
-                <p className="font-medium font-mono text-white">
-                  {userENS || 'No ENS connected'}
-                </p>
-                <p className="text-sm text-gray-400">
-                  {userENS ? 'Primary ENS for routing policies' : 'Connect an ENS to use EnRoute features'}
-                </p>
-              </div>
-              <Badge 
-                variant={userENS ? "default" : "outline"} 
-                className={userENS ? "bg-emerald-500 text-black" : "border-gray-600 text-gray-400"}
-              >
-                {userENS ? 'Active' : 'Not Set'}
-              </Badge>
-            </div>
-
-            <Button 
-              variant="outline" 
-              className="w-full bg-transparent border-gray-700 text-white hover:bg-gray-800"
-              disabled={!userENS}
-            >
-              {userENS ? 'Change Linked ENS' : 'Set Up ENS'}
-            </Button>
           </CardContent>
         </Card>
 

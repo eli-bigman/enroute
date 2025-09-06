@@ -46,27 +46,6 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
     error,
     hash 
   } = useCreateSimpleSplitPolicy()
-
-  // Debug Web3 state
-  React.useEffect(() => {
-    console.log("Web3 State Debug:", {
-      address,
-      creationFee: creationFee?.toString(),
-      isPending,
-      isConfirming,
-      isConfirmed,
-      error: error?.message,
-      hash,
-      createSimpleSplitPolicy: typeof createSimpleSplitPolicy
-    })
-    
-    // Also debug contract addresses
-    console.log("Contract addresses:", {
-      POLICY_FACTORY: process.env.NEXT_PUBLIC_POLICY_FACTORY_ADDRESS,
-      SIMPLE_SPLIT_IMPL: process.env.NEXT_PUBLIC_SIMPLE_SPLIT_IMPL,
-      POLICY_TYPE: POLICY_TYPES.SIMPLE_SPLIT
-    })
-  }, [address, creationFee, isPending, isConfirming, isConfirmed, error, hash, createSimpleSplitPolicy])
   
   const [recipients, setRecipients] = useState<Recipient[]>([])
   const [newRecipientAddress, setNewRecipientAddress] = useState("")
@@ -102,19 +81,7 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
   const totalPercentage = recipients.reduce((sum, recipient) => sum + recipient.percentage, 0)
 
   const savePolicy = async () => {
-    console.log("savePolicy called!")
-    console.log("Current state:", {
-      totalPercentage,
-      recipientsLength: recipients.length,
-      address,
-      isPending,
-      isConfirming,
-      policyName,
-      recipients
-    })
-
     if (totalPercentage !== 100) {
-      console.log("Invalid percentage:", totalPercentage)
       toast({
         title: "Invalid percentages",
         description: "Total percentages must equal 100%",
@@ -123,10 +90,7 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
       return
     }
 
-    console.log("Percentage check passed")
-
     if (!address) {
-      console.log("No wallet address")
       toast({
         title: "Wallet not connected",
         description: "Please connect your wallet to create a policy",
@@ -135,10 +99,7 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
       return
     }
 
-    console.log("Address check passed")
-
     if (recipients.length === 0) {
-      console.log("No recipients")
       toast({
         title: "No recipients",
         description: "Please add at least one recipient",
@@ -147,27 +108,14 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
       return
     }
 
-    console.log("Recipients check passed")
-
     try {
-      console.log("Starting policy creation...")
       // Prepare data for contract call
       const recipientAddresses = recipients.map(recipient => recipient.address as `0x${string}`)
       const percentages = recipients.map(recipient => recipient.percentage * 100) // Convert to basis points
       const labels = recipients.map(recipient => recipient.label)
       const value = creationFee ? creationFee : parseEther("0.001") // Fallback fee
 
-      console.log("Prepared data:", {
-        recipientAddresses,
-        percentages,
-        labels,
-        value: value.toString(),
-        policyName,
-        policyDescription
-      })
-
       // Create the policy on-chain
-      console.log("Calling createSimpleSplitPolicy...")
       const result = createSimpleSplitPolicy(
         address,
         policyName,
@@ -178,20 +126,12 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
         value
       )
 
-      console.log("createSimpleSplitPolicy called, result:", result)
-
       toast({
         title: "Creating policy...",
         description: "Transaction submitted. Please wait for confirmation.",
       })
 
     } catch (err) {
-      console.error("Error creating policy:", err)
-      console.error("Error details:", {
-        message: err instanceof Error ? err.message : String(err),
-        stack: err instanceof Error ? err.stack : undefined,
-        cause: err instanceof Error ? err.cause : undefined
-      })
       toast({
         title: "Error creating policy",
         description: err instanceof Error ? err.message : "Please try again",
@@ -405,11 +345,7 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
               )}
 
               <Button
-                onClick={(e) => {
-                  console.log("Button clicked!", e)
-                  console.log("Button disabled state:", totalPercentage !== 100 || recipients.length === 0 || isPending || isConfirming || !address)
-                  savePolicy()
-                }}
+                onClick={savePolicy}
                 disabled={totalPercentage !== 100 || recipients.length === 0 || isPending || isConfirming || !address}
                 className="w-full bg-emerald-500 hover:bg-emerald-600 text-black disabled:bg-gray-700 disabled:text-gray-400"
               >

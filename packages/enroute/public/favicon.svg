@@ -1,34 +1,82 @@
-<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <radialGradient id="bg" cx="50%" cy="50%" r="50%">
       <stop offset="0%" style="stop-color:#1a2332;stop-opacity:1" />
       <stop offset="100%" style="stop-color:#0a0f14;stop-opacity:1" />
     </radialGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+    </linearGradient>
   </defs>
   
   <!-- Background Circle -->
-  <circle cx="16" cy="16" r="15" fill="url(#bg)" stroke="#10b981" stroke-width="1"/>
+  <circle cx="400" cy="400" r="380" fill="url(#bg)" stroke="url(#glow)" stroke-width="4"/>
   
-  <!-- Central Policy Circle -->
-  <circle cx="16" cy="16" r="8" fill="none" stroke="#10b981" stroke-width="1.5"/>
-  <circle cx="16" cy="16" r="6" fill="none" stroke="#10b981" stroke-width="1" opacity="0.7"/>
+  <!-- Outer Ring -->
+  <circle cx="400" cy="400" r="350" fill="none" stroke="#10b981" stroke-width="2" opacity="0.6"/>
   
-  <!-- POLICY Text (simplified for small size) -->
-  <text x="16" y="18" text-anchor="middle" font-family="monospace" font-size="4" font-weight="bold" fill="#10b981">P</text>
-  
-  <!-- Tech Elements -->
-  <circle cx="16" cy="4" r="1.5" fill="#10b981" opacity="0.8"/>
-  <circle cx="28" cy="16" r="1.5" fill="#10b981" opacity="0.8"/>
-  <circle cx="16" cy="28" r="1.5" fill="#10b981" opacity="0.8"/>
-  <circle cx="4" cy="16" r="1.5" fill="#10b981" opacity="0.8"/>
+  <!-- Tech Circles -->
+  <circle cx="400" cy="120" r="12" fill="#10b981" opacity="0.8"/>
+  <circle cx="600" cy="200" r="8" fill="#10b981" opacity="0.6"/>
+  <circle cx="680" cy="400" r="10" fill="#10b981" opacity="0.7"/>
+  <circle cx="600" cy="600" r="8" fill="#10b981" opacity="0.6"/>
+  <circle cx="400" cy="680" r="12" fill="#10b981" opacity="0.8"/>
+  <circle cx="200" cy="600" r="8" fill="#10b981" opacity="0.6"/>
+  <circle cx="120" cy="400" r="10" fill="#10b981" opacity="0.7"/>
+  <circle cx="200" cy="200" r="8" fill="#10b981" opacity="0.6"/>
   
   <!-- Connecting Lines -->
-  <path d="M 16 6 L 16 10" stroke="#10b981" stroke-width="1" opacity="0.5"/>
-  <path d="M 22 16 L 26 16" stroke="#10b981" stroke-width="1" opacity="0.5"/>
-  <path d="M 16 22 L 16 26" stroke="#10b981" stroke-width="1" opacity="0.5"/>
-  <path d="M 10 16 L 6 16" stroke="#10b981" stroke-width="1" opacity="0.5"/>
+  <path d="M 400 120 L 400 280" stroke="#10b981" stroke-width="2" opacity="0.5"/>
+  <path d="M 520 400 L 680 400" stroke="#10b981" stroke-width="2" opacity="0.5"/>
+  <path d="M 400 520 L 400 680" stroke="#10b981" stroke-width="2" opacity="0.5"/>
+  <path d="M 280 400 L 120 400" stroke="#10b981" stroke-width="2" opacity="0.5"/>
   
-  <!-- Inner Status Indicators -->
-  <circle cx="18" cy="14" r="1" fill="#10b981" opacity="0.6"/>
-  <circle cx="14" cy="18" r="1" fill="#10b981" opacity="0.6"/>
+  <!-- Central Policy Circle -->
+  <circle cx="400" cy="400" r="80" fill="none" stroke="#10b981" stroke-width="3"/>
+  <circle cx="400" cy="400" r="60" fill="none" stroke="#10b981" stroke-width="2" opacity="0.7"/>
+  
+  <!-- POLICY Text -->
+  <text x="400" y="410" text-anchor="middle" font-family="monospace" font-size="16" font-weight="bold" fill="#10b981">POLICY</text>
+  
+  <!-- Inner Tech Elements -->
+  <circle cx="400" cy="340" r="4" fill="#10b981"/>
+  <circle cx="450" cy="400" r="4" fill="#10b981"/>
+  <circle cx="400" cy="460" r="4" fill="#10b981"/>
+  <circle cx="350" cy="400" r="4" fill="#10b981"/>
+  
+  <!-- Ethereum Symbols -->
+  <g transform="translate(380,140)">
+    <polygon points="20,0 40,20 20,40 0,20" fill="none" stroke="#10b981" stroke-width="2"/>
+    <polygon points="20,10 30,20 20,30 10,20" fill="#10b981" opacity="0.6"/>
+  </g>
+  
+  <g transform="translate(660,380)">
+    <polygon points="20,0 40,20 20,40 0,20" fill="none" stroke="#10b981" stroke-width="2"/>
+    <polygon points="20,10 30,20 20,30 10,20" fill="#10b981" opacity="0.6"/>
+  </g>
+  
+  <!-- Status Indicators -->
+  <circle cx="430" cy="370" r="6" fill="none" stroke="#10b981" stroke-width="2"/>
+  <path d="M 425 370 L 430 375 L 440 360" stroke="#10b981" stroke-width="2" fill="none"/>
+  
+  <circle cx="370" cy="430" r="6" fill="none" stroke="#10b981" stroke-width="2"/>
+  <path d="M 365 425 L 375 435" stroke="#10b981" stroke-width="2"/>
+  <path d="M 375 425 L 365 435" stroke="#10b981" stroke-width="2"/>
+  
+  <!-- Outer Tech Dots -->
+  <circle cx="300" cy="300" r="2" fill="#10b981" opacity="0.4"/>
+  <circle cx="500" cy="300" r="2" fill="#10b981" opacity="0.4"/>
+  <circle cx="500" cy="500" r="2" fill="#10b981" opacity="0.4"/>
+  <circle cx="300" cy="500" r="2" fill="#10b981" opacity="0.4"/>
+  
+  <!-- Constellation Effect -->
+  <circle cx="250" cy="250" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="550" cy="250" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="550" cy="550" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="250" cy="550" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="180" cy="320" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="620" cy="320" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="620" cy="480" r="1" fill="#10b981" opacity="0.3"/>
+  <circle cx="180" cy="480" r="1" fill="#10b981" opacity="0.3"/>
 </svg>

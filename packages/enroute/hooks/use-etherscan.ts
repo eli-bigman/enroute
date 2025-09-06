@@ -51,8 +51,6 @@ export function useEtherscanTransactions(address: `0x${string}` | undefined, lim
       setIsLoading(true)
       setError(null)
 
-      console.log('🔍 Fetching transactions for address:', address)
-
       try {
         // Temporary: Add mock data to test if the component rendering works
         const mockTransactions: FormattedTransaction[] = [
@@ -82,7 +80,6 @@ export function useEtherscanTransactions(address: `0x${string}` | undefined, lim
           }
         ]
         
-        console.log('🧪 Using temporary mock transactions for testing')
         setTransactions(mockTransactions)
         setIsLoading(false)
         return
@@ -95,9 +92,6 @@ export function useEtherscanTransactions(address: `0x${string}` | undefined, lim
         
         const url = `${baseUrl}?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=${limit}&sort=desc&apikey=${apiKey}`
         
-        console.log('📡 API URL:', url.replace(apiKey || '', '***API_KEY***'))
-        console.log('🔑 Using API key:', apiKey ? 'Yes' : 'No')
-        
         const response = await fetch(url)
 
         if (!response.ok) {
@@ -105,10 +99,8 @@ export function useEtherscanTransactions(address: `0x${string}` | undefined, lim
         }
 
         const data = await response.json()
-        console.log('📊 API Response:', data)
 
         if (data.status === '0' && data.message === 'No transactions found') {
-          console.log('❌ No transactions found for address')
           setTransactions([])
           return
         }
@@ -116,8 +108,6 @@ export function useEtherscanTransactions(address: `0x${string}` | undefined, lim
         if (data.status === '0') {
           throw new Error(data.message || 'Failed to fetch transactions')
         }
-
-        console.log('✅ Found', data.result?.length || 0, 'transactions')
 
         const formattedTxs: FormattedTransaction[] = data.result.map((tx: EtherscanTransaction) => {
           const isSent = tx.from.toLowerCase() === address.toLowerCase()
@@ -164,11 +154,9 @@ export function useEtherscanTransactions(address: `0x${string}` | undefined, lim
           }
         })
 
-        console.log('🎉 Formatted transactions:', formattedTxs)
         setTransactions(formattedTxs)
         */
       } catch (err) {
-        console.error('❌ Error fetching transactions:', err)
         setError(err instanceof Error ? err.message : 'Unknown error')
         setTransactions([])
       } finally {

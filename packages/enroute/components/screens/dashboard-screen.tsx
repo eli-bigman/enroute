@@ -25,17 +25,6 @@ export function DashboardScreen({ userENS, onScreenChange }: DashboardScreenProp
   const { policies, policyCount, isLoading: policiesLoading, refetch: refetchPolicies } = useUserPoliciesDetailed(address)
   const { transactions, isLoading: transactionsLoading, error: transactionsError } = useEtherscanTransactions(address, 5)
   
-  // Debug transaction data
-  React.useEffect(() => {
-    console.log('🔍 Dashboard Transaction Debug:', {
-      address,
-      transactionsLoading,
-      transactionsError,
-      transactionsCount: transactions?.length || 0,
-      transactions: transactions?.slice(0, 2) // Log first 2 for debugging
-    })
-  }, [address, transactionsLoading, transactionsError, transactions])
-  
   // Last update time
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   

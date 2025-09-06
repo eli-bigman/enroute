@@ -18,7 +18,6 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
     { id: "dashboard", label: "Dashboard", icon: Home },
     { id: "policy-builder", label: "Policy Builder", icon: FileText },
     { id: "send", label: "Send", icon: Send },
-    { id: "marketplace", label: "Marketplace", icon: Store },
     { id: "settings", label: "Settings", icon: Settings },
   ]
 

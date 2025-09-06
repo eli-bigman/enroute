@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { useUserPoliciesDetailed } from "@/hooks/use-enroute-contracts"
+import { useUserPoliciesDetailed, usePolicyRecipients } from "@/hooks/use-enroute-contracts"
 import { useToast } from "@/hooks/use-toast"
 
 interface SendScreenProps {
@@ -32,6 +32,10 @@ export function SendScreen({ userENS }: SendScreenProps) {
   const [isResolving, setIsResolving] = useState(false)
   const [resolvedPolicy, setResolvedPolicy] = useState<any>(null)
   const [resolutionError, setResolutionError] = useState("")
+  const [selectedPolicyAddress, setSelectedPolicyAddress] = useState<`0x${string}` | undefined>(undefined)
+
+  // Fetch real recipients data from blockchain
+  const { data: recipients, isLoading: recipientsLoading } = usePolicyRecipients(selectedPolicyAddress)
 
   const tokens = [
     { symbol: "ETH", name: "Ethereum", decimals: 18 },
@@ -42,13 +46,6 @@ export function SendScreen({ userENS }: SendScreenProps) {
 
   // ENS resolution simulation (in real app, this would call ENS resolver)
   const resolveENS = async (ensName: string) => {
-    console.log("🔍 ENS Resolution Debug:", {
-      ensName,
-      userENS,
-      currentUserFromENS: userENS ? userENS.split('.')[0] : null,
-      policies: policies?.map(p => ({ name: p.name, active: p.active }))
-    })
-    
     setIsResolving(true)
     setResolutionError("")
     setResolvedPolicy(null)
@@ -97,16 +94,18 @@ export function SendScreen({ userENS }: SendScreenProps) {
         throw new Error(`No active policy found for ${subname}. Available policies: ${policies.map(p => p.name).join(', ')}`)
       }
 
-      // Mock policy details (in real app, this would come from contract)
-      const mockPolicyDetails = {
+      // Set the policy address to fetch recipients
+      setSelectedPolicyAddress(matchingPolicy.policyContract as `0x${string}`)
+
+      // Create policy details with real data (recipients will be fetched separately)
+      const policyDetails = {
         ...matchingPolicy,
         fullENS: ensName,
-        recipients: [],
         acceptedTokens: ["ETH", "USDC", "USDT", "DAI"],
         minAmount: "0.001"
       }
 
-      setResolvedPolicy(mockPolicyDetails)
+      setResolvedPolicy(policyDetails)
       
     } catch (error) {
       setResolutionError(error instanceof Error ? error.message : "Failed to resolve ENS name")
@@ -157,7 +156,6 @@ export function SendScreen({ userENS }: SendScreenProps) {
       })
       
     } catch (error) {
-      console.error("Transaction error:", error)
       toast({
         title: "Transaction Failed", 
         description: "Please try again",
@@ -318,12 +316,12 @@ export function SendScreen({ userENS }: SendScreenProps) {
                     placeholder="0.00"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 text-3xl h-16 text-center font-mono"
+                    className="bg-gray-800 border-gray-700 text-white placeholder-gray-500 text-4xl md:text-5xl lg:text-6xl h-20 md:h-24 lg:h-28 text-center font-mono [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
                     step="0.001"
                     min="0"
                   />
                   <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                    <span className="text-xl font-medium text-gray-400">{selectedToken}</span>
+                    <span className="text-xl md:text-2xl lg:text-3xl font-medium text-gray-400">{selectedToken}</span>
                   </div>
                 </div>
 
@@ -385,28 +383,69 @@ export function SendScreen({ userENS }: SendScreenProps) {
                   <Separator />
 
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-300">Payment Distribution:</h4>
-                    {resolvedPolicy.recipients.map((recipient: any, index: number) => (
-                      <div key={index} className="flex items-center justify-between py-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-emerald-500">→</span>
-                          <div>
-                            <p className="text-sm text-white">{recipient.label}</p>
-                            <p className="text-xs text-gray-500 font-mono">
-                              {recipient.address.slice(0, 6)}...{recipient.address.slice(-4)}
-                            </p>
+                    <h4 className="text-sm font-medium text-gray-300">Recipient Addresses:</h4>
+                    {recipientsLoading ? (
+                      <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <p className="text-gray-400">Loading recipients...</p>
+                      </div>
+                    ) : recipients && recipients.length > 0 ? (
+                      recipients.map((recipient: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                          <div className="flex items-center gap-3">
+                            <span className="text-emerald-500">💰</span>
+                            <div>
+                              <p className="text-sm font-medium text-white">{recipient.label}</p>
+                              <p className="text-xs text-gray-400 font-mono break-all">
+                                {recipient.wallet}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-emerald-400">{(Number(recipient.percentage) / 100).toFixed(1)}%</p>
+                            {amount && (
+                              <p className="text-xs text-gray-300">
+                                {((parseFloat(amount) * Number(recipient.percentage)) / 10000).toFixed(4)} {selectedToken}
+                              </p>
+                            )}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-medium text-white">{recipient.percentage}%</p>
-                          {amount && (
-                            <p className="text-xs text-gray-400">
-                              {((parseFloat(amount) * recipient.percentage) / 100).toFixed(4)} {selectedToken}
-                            </p>
-                          )}
-                        </div>
+                      ))
+                    ) : (
+                      <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+                        <p className="text-gray-400">No recipients found for this policy</p>
                       </div>
-                    ))}
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <h4 className="text-sm font-medium text-gray-300">Payment Distribution:</h4>
+                    {recipients && recipients.length > 0 ? (
+                      recipients.map((recipient: any, index: number) => (
+                        <div key={index} className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-emerald-500">→</span>
+                            <div>
+                              <p className="text-sm text-white">{recipient.label}</p>
+                              <p className="text-xs text-gray-500 font-mono">
+                                {recipient.wallet.slice(0, 6)}...{recipient.wallet.slice(-4)}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-medium text-white">{(Number(recipient.percentage) / 100).toFixed(1)}%</p>
+                            {amount && (
+                              <p className="text-xs text-gray-400">
+                                {((parseFloat(amount) * Number(recipient.percentage)) / 10000).toFixed(4)} {selectedToken}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400">No distribution data available</p>
+                    )}
                   </div>
 
                   <Separator />

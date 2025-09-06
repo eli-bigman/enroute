@@ -7,14 +7,25 @@ import { ConnectScreen } from "@/components/screens/connect-screen"
 import { PolicyBuilderScreen } from "@/components/screens/policy-builder-screen"
 import { DashboardScreen } from "@/components/screens/dashboard-screen"
 import { SendScreen } from "@/components/screens/send-screen"
-import { MarketplaceScreen } from "@/components/screens/marketplace-screen"
 import { SettingsScreen } from "@/components/screens/settings-screen"
+import { useUserUsername } from "@/hooks/use-enroute-contracts"
 
 export default function EnRouteApp() {
   const [currentScreen, setCurrentScreen] = useState("connect")
   const [username, setUsername] = useState<string>("")
   const [userENS, setUserENS] = useState<string | null>(null)
   const { address, isConnected } = useAccount()
+
+  // Fetch username from blockchain when connected
+  const { data: blockchainUsername, isLoading: usernameLoading } = useUserUsername(address)
+
+  // Update ENS when blockchain username is fetched
+  useEffect(() => {
+    if (blockchainUsername && isConnected) {
+      setUsername(blockchainUsername)
+      setUserENS(`${blockchainUsername}.enrouteapp.eth`)
+    }
+  }, [blockchainUsername, isConnected])
 
   // Reset state when wallet disconnects
   useEffect(() => {
@@ -26,8 +37,12 @@ export default function EnRouteApp() {
   }, [isConnected])
 
   const handleWalletConnect = (enteredUsername: string) => {
-    setUsername(enteredUsername)
-    setUserENS(`${enteredUsername}.enrouteapp.eth`)
+    // If username from blockchain doesn't match entered username, use entered one
+    // This handles the case where user registers a new username
+    if (enteredUsername !== blockchainUsername) {
+      setUsername(enteredUsername)
+      setUserENS(`${enteredUsername}.enrouteapp.eth`)
+    }
     setCurrentScreen("dashboard")
   }
 
@@ -47,8 +62,6 @@ export default function EnRouteApp() {
         return <DashboardScreen userENS={userENS} onScreenChange={setCurrentScreen} />
       case "send":
         return <SendScreen userENS={userENS} />
-      case "marketplace":
-        return <MarketplaceScreen userENS={userENS} onScreenChange={setCurrentScreen} />
       case "settings":
         return (
           <SettingsScreen

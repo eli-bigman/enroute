@@ -135,14 +135,6 @@ export function useCreatePolicy() {
   })
 
   const createPolicy = (policyType: number, policyName: string, initData: `0x${string}`, value: bigint) => {
-    console.log("createPolicy called with:", {
-      policyType,
-      policyName,
-      initData,
-      value: value.toString(),
-      factoryAddress: CONTRACTS.POLICY_FACTORY
-    })
-    
     try {
       const result = writeContract({
         address: CONTRACTS.POLICY_FACTORY,
@@ -153,10 +145,8 @@ export function useCreatePolicy() {
         gas: BigInt(1000000), // Set explicit gas limit for policy creation
       })
       
-      console.log("writeContract result:", result)
       return result
     } catch (err) {
-      console.error("writeContract error:", err)
       throw err
     }
   }
@@ -227,4 +217,16 @@ export function useCreateSimpleSplitPolicy() {
     isConfirmed,
     error,
   }
+}
+
+// Hook to get policy recipients from a specific policy contract
+export function usePolicyRecipients(policyAddress: `0x${string}` | undefined) {
+  return useReadContract({
+    address: policyAddress,
+    abi: SIMPLE_SPLIT_POLICY_ABI,
+    functionName: 'getRecipients',
+    query: {
+      enabled: !!policyAddress,
+    },
+  })
 }

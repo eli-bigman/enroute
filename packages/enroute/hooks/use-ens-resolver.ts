@@ -92,7 +92,7 @@ export function useBulkENSResolver(addresses: string[]) {
           // If you have a way to batch resolve, implement it here
           // For now, we'll just set to null and let individual resolvers handle it
         } catch (error) {
-          console.warn(`Failed to resolve ENS for ${address}:`, error)
+          // Silent fail for ENS resolution
           newResolutions[address.toLowerCase()] = null
         }
       }
