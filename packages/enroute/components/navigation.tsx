@@ -15,8 +15,8 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
 
   const navItems = [
     { id: "connect", label: "Connect", icon: Wallet },
-    { id: "policy-builder", label: "Policy Builder", icon: FileText },
     { id: "dashboard", label: "Dashboard", icon: Home },
+    { id: "policy-builder", label: "Policy Builder", icon: FileText },
     { id: "send", label: "Send", icon: Send },
     { id: "transactions", label: "Transactions", icon: History },
     { id: "marketplace", label: "Marketplace", icon: Store },

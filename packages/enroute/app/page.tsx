@@ -28,7 +28,7 @@ export default function EnRouteApp() {
 
   const handleWalletConnect = (enteredUsername: string) => {
     setUsername(enteredUsername)
-    setUserENS(`${enteredUsername}.enroute.eth`)
+    setUserENS(`${enteredUsername}.enrouteapp.eth`)
     setCurrentScreen("dashboard")
   }
 
