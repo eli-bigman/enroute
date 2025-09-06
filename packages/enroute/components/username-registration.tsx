@@ -1,26 +1,39 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Check, AlertCircle, User } from "lucide-react"
-import { useUsernameValidation } from "@/hooks/use-user-registration"
+import { useUsernameValidation, useUserRegistration } from "@/hooks/use-user-registration"
 
 interface UsernameRegistrationProps {
   onRegister: (username: string) => void
   isRegistering: boolean
   error: string | null
+  onSuccess?: (username: string) => void
 }
 
-export function UsernameRegistration({ onRegister, isRegistering, error }: UsernameRegistrationProps) {
+export function UsernameRegistration({ onRegister, isRegistering, error, onSuccess }: UsernameRegistrationProps) {
   const [username, setUsername] = useState("")
+  const [registeredUsername, setRegisteredUsername] = useState("")
   const validation = useUsernameValidation(username)
+  const registration = useUserRegistration()
+
+  // Watch for successful registration
+  useEffect(() => {
+    // Check if registration was just confirmed and we have a pending username
+    if (registration.isRegistered && registeredUsername && onSuccess) {
+      onSuccess(registeredUsername)
+      setRegisteredUsername("") // Reset after calling success
+    }
+  }, [registration.isRegistered, registeredUsername, onSuccess])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validation.isValid && !isRegistering) {
+      setRegisteredUsername(username) // Store the username we're registering
       onRegister(username)
     }
   }

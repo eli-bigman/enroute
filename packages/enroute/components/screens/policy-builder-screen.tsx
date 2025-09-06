@@ -50,6 +50,7 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
   const [recipients, setRecipients] = useState<Recipient[]>([])
   const [newRecipientAddress, setNewRecipientAddress] = useState("")
   const [newRecipientLabel, setNewRecipientLabel] = useState("")
+  const [newRecipientPercentage, setNewRecipientPercentage] = useState<number>(0)
   const [policies, setPolicies] = useState<PolicyRule[]>([])
   const [showPreview, setShowPreview] = useState(false)
   const [policyName, setPolicyName] = useState("")
@@ -61,13 +62,14 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
     const newRecipient: Recipient = {
       id: Date.now().toString(),
       address: newRecipientAddress,
-      percentage: 0,
+      percentage: newRecipientPercentage,
       label: newRecipientLabel,
     }
 
     setRecipients([...recipients, newRecipient])
     setNewRecipientLabel("")
     setNewRecipientAddress("")
+    setNewRecipientPercentage(0)
   }
 
   const removeRecipient = (id: string) => {
@@ -261,6 +263,32 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
                       className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
                     />
                   </div>
+                  <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Percentage Allocation</label>
+                    <div className="flex items-center gap-3">
+                      <div className="relative flex-1">
+                        <Input
+                          type="number"
+                          min="0"
+                          max="100"
+                          step="0.1"
+                          placeholder="0"
+                          value={newRecipientPercentage || ""}
+                          onChange={(e) => setNewRecipientPercentage(Number(e.target.value) || 0)}
+                          className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500 text-lg font-bold pr-8"
+                        />
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-bold">%</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-emerald-400">
+                          {newRecipientPercentage || 0}%
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          of total
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <Button
                     onClick={addRecipient}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-black"
@@ -278,8 +306,8 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
                   <h4 className="font-medium text-sm text-white">Current Recipients</h4>
                   {recipients.map((recipient) => (
                   <Card key={recipient.id} className="border-gray-700 bg-gray-800/50">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-center justify-between">
+                    <CardContent className="p-4 space-y-4">
+                      <div className="flex items-start justify-between">
                         <div className="space-y-1 min-w-0 flex-1">
                           <p className="font-medium text-white">{recipient.label}</p>
                           <p className="text-xs text-gray-400 font-mono truncate">
@@ -295,16 +323,33 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={recipient.percentage}
-                          onChange={(e) => updatePercentage(recipient.id, Number(e.target.value))}
-                          className="w-20 bg-gray-900 border-gray-700 text-white"
-                        />
-                        <span className="text-sm text-gray-400">%</span>
+                      
+                      {/* Large Percentage Display */}
+                      <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-600">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <label className="text-xs text-gray-400 mb-2 block">Percentage Allocation</label>
+                            <div className="flex items-center gap-3">
+                              <Input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="0.1"
+                                value={recipient.percentage || ""}
+                                onChange={(e) => updatePercentage(recipient.id, Number(e.target.value) || 0)}
+                                className="w-32 bg-gray-800 border-gray-600 text-white font-bold text-lg"
+                              />
+                              <div className="text-right">
+                                <div className="text-4xl font-bold text-emerald-400">
+                                  {recipient.percentage || 0}%
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  of total policy
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -313,23 +358,49 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
               )}
 
               {/* Percentage Summary */}
-              <div className="p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-white">Total Allocation:</span>
-                  <Badge
-                    variant="outline"
-                    className={
-                      totalPercentage === 100
-                        ? "bg-emerald-500 text-black border-emerald-500"
-                        : "bg-red-500 text-white border-red-500"
-                    }
-                  >
-                    {totalPercentage}%
-                  </Badge>
+              <div className="p-6 bg-gray-800/50 rounded-lg border border-gray-700">
+                <div className="text-center space-y-4">
+                  <h4 className="text-sm font-medium text-gray-300 uppercase tracking-wider">Total Allocation</h4>
+                  <div className="flex items-center justify-center">
+                    <div className="text-6xl font-bold tabular-nums">
+                      <span className={
+                        totalPercentage === 100
+                          ? "text-emerald-400"
+                          : totalPercentage > 100
+                          ? "text-red-400"
+                          : "text-yellow-400"
+                      }>
+                        {totalPercentage}
+                      </span>
+                      <span className="text-gray-500">%</span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-500 ${
+                          totalPercentage === 100 
+                            ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
+                            : totalPercentage > 100
+                            ? "bg-gradient-to-r from-red-500 to-red-400"
+                            : "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                        }`}
+                        style={{ width: `${Math.min(totalPercentage, 100)}%` }}
+                      />
+                    </div>
+                    
+                    <div className="text-center">
+                      {totalPercentage === 100 ? (
+                        <p className="text-emerald-400 text-sm font-medium">✓ Perfect! Ready to create policy</p>
+                      ) : totalPercentage > 100 ? (
+                        <p className="text-red-400 text-sm font-medium">⚠ Over allocation - reduce percentages</p>
+                      ) : (
+                        <p className="text-yellow-400 text-sm font-medium">⚠ Under allocation - add {100 - totalPercentage}% more</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                {totalPercentage !== 100 && (
-                  <p className="text-xs text-gray-400 mt-1">Must equal 100% to save policy</p>
-                )}
               </div>
 
               {/* Creation Fee Info */}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useAccount, useDisconnect, useChainId, useSwitchChain } from "wagmi"
 import { ConnectKitButton } from "connectkit"
 import { Button } from "@/components/ui/button"
@@ -9,6 +9,7 @@ import { Wallet, LogOut, Network } from "lucide-react"
 import { UsernameRegistration } from "@/components/username-registration"
 import { useUserRegistration } from "@/hooks/use-user-registration"
 import { DebugRegistration } from "@/components/debug-registration"
+import { AccountCreationCountdown } from "@/components/account-creation-countdown"
 
 interface ConnectScreenProps {
   onConnect: (username: string) => void
@@ -20,12 +21,24 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
   const { disconnect } = useDisconnect()
   const chainId = useChainId()
   const { switchChain } = useSwitchChain()
+  const [showCountdown, setShowCountdown] = useState(false)
+  const [pendingUsername, setPendingUsername] = useState("")
   
   // Use our registration hook
   const registration = useUserRegistration()
 
   // Handle user status changes - only auto-navigate for newly registered users
   // Remove auto-navigation for existing users so they can see their status and choose to proceed
+
+  const handleRegistrationSuccess = (username: string) => {
+    setPendingUsername(username)
+    setShowCountdown(true)
+  }
+
+  const handleCountdownComplete = () => {
+    setShowCountdown(false)
+    onConnect(pendingUsername)
+  }
 
   // Helper function to get network name
   const getNetworkName = (chainId: number) => {
@@ -51,6 +64,11 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
 
   // Check if we need to switch to Base Sepolia
   const needsNetworkSwitch = isConnected && chainId !== 84532
+
+  // Show countdown if triggered
+  if (showCountdown) {
+    return <AccountCreationCountdown onComplete={handleCountdownComplete} />
+  }
 
   // If connected and on correct network, handle registration flow
   if (isConnected && address) {
@@ -88,6 +106,7 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
               onRegister={registration.register}
               isRegistering={registration.isRegistering}
               error={registration.error}
+              onSuccess={handleRegistrationSuccess}
             />
           </div>
         </div>
