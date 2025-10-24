@@ -19,8 +19,7 @@ Perfect for payrolls, DAO treasury flows, bounty payouts, and automated subscrip
 ## 🧠 Built With
 - ENS → Subnames + policy-based routing  
 - Base → Fast, cheap settlement layer  
-- Buidl Guild / Scaffold-ETH → Dev environment  
-- Ethereum On-Chain Finance → Policy logic & smart contracts  
+- Scaffold-ETH → Dev environment  
 - Durin → L2 Resolver framework
 
 ## 💡 Use Cases
