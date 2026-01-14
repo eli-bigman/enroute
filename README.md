@@ -33,8 +33,7 @@ Perfect for payrolls, DAO treasury flows, bounty payouts, and automated subscrip
 Try it here: [https://enrouteapp.vercel.app](https://enrouteapp.vercel.app)
 
 
-## Next Steps
-- Integrate with Base Mini App for native discovery  
+## Next Steps 
 - Expand policy templates for DAOs and teams  
 - Optimize gas costs for multi-recipient payments  
 
@@ -46,4 +45,3 @@ Team
 
 ---
 
-Built with 💙 on BASE
