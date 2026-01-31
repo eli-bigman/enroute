@@ -79,7 +79,7 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
             <div className="text-center space-y-6">
               <div className="w-20 h-20 flex items-center justify-center mx-auto relative">
                 <img 
-                  src="/enroute-logo.svg" 
+                  src="/enroute_logo.png" 
                   alt="EnRoute" 
                   className="w-full h-full"
                 />
@@ -120,7 +120,7 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
             <div className="text-center space-y-6">
               <div className="w-20 h-20 flex items-center justify-center mx-auto">
                 <img 
-                  src="/enroute-logo.svg" 
+                  src="/enroute_logo.png" 
                   alt="EnRoute" 
                   className="w-full h-full"
                 />
@@ -198,7 +198,7 @@ export function ConnectScreen({ onConnect, isConnected, address }: ConnectScreen
         <div className="text-center space-y-6">
           <div className="w-20 h-20 flex items-center justify-center mx-auto">
             <img 
-              src="/enroute-logo.svg" 
+              src="/enroute_logo.png" 
               alt="EnRoute" 
               className="w-full h-full"
             />
