@@ -8,10 +8,18 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Plus, Trash2, Wallet, ArrowRight, Save, Eye, Settings, Loader2 } from "lucide-react"
+import { Plus, Trash2, Wallet, ArrowRight, Save, Eye, Settings, Loader2, CheckCircle, Calculator } from "lucide-react"
 import { useCreateSimpleSplitPolicy, usePolicyCreationFee } from "@/hooks/use-enroute-contracts"
 import { POLICY_TYPES } from "@/lib/contracts"
 import { useToast } from "@/hooks/use-toast"
+import { createPublicClient, http } from "viem"
+import { mainnet } from "viem/chains"
+import { normalize } from "viem/ens"
+
+const mainnetClient = createPublicClient({
+  chain: mainnet,
+  transport: http(),
+})
 
 interface PolicyBuilderScreenProps {
   userENS: string | null
@@ -55,13 +63,74 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
   const [showPreview, setShowPreview] = useState(false)
   const [policyName, setPolicyName] = useState("")
   const [policyDescription, setPolicyDescription] = useState("")
+  const [simulationAmount, setSimulationAmount] = useState<string>("1")
+
+  // ENS Resolution State
+  const [resolvedEnsAddress, setResolvedEnsAddress] = useState<string | null>(null)
+  const [isResolvingEns, setIsResolvingEns] = useState(false)
+
+  // Debounce and Resolve ENS
+  React.useEffect(() => {
+    let active = true
+    const nameToResolve = newRecipientAddress
+
+    const resolveEns = async () => {
+      if (nameToResolve.endsWith(".eth")) {
+        if (active) {
+          setIsResolvingEns(true)
+          setResolvedEnsAddress(null)
+        }
+        
+        try {
+          const address = await mainnetClient.getEnsAddress({
+            name: normalize(nameToResolve),
+          })
+          
+          if (active) {
+            if (address) {
+              // 1. Set Label to the ENS name we resolved
+              setNewRecipientLabel(nameToResolve)
+              // 2. Set Address field to the resolved 0x address
+              setNewRecipientAddress(address)
+              
+              // Clear resolving state
+              setResolvedEnsAddress(null) 
+            } else {
+              setResolvedEnsAddress(null)
+            }
+            setIsResolvingEns(false)
+          }
+        } catch (error) {
+          console.error("ENS Resolution error:", error)
+          if (active) {
+            setResolvedEnsAddress(null)
+            setIsResolvingEns(false)
+          }
+        }
+      } else {
+        if (active) {
+          setResolvedEnsAddress(null)
+          setIsResolvingEns(false)
+        }
+      }
+    }
+
+    const timeoutId = setTimeout(resolveEns, 500)
+    
+    return () => {
+      active = false
+      clearTimeout(timeoutId)
+    }
+  }, [newRecipientAddress])
 
   const addRecipient = () => {
     if (!newRecipientLabel.trim() || !newRecipientAddress.trim()) return
 
+    const finalAddress = resolvedEnsAddress || newRecipientAddress
+
     const newRecipient: Recipient = {
       id: Date.now().toString(),
-      address: newRecipientAddress,
+      address: finalAddress,
       percentage: newRecipientPercentage,
       label: newRecipientLabel,
     }
@@ -246,20 +315,32 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
                 <h4 className="font-medium text-sm text-white">Add New Recipient</h4>
                 <div className="space-y-3">
                   <div>
+                    <label className="text-xs text-gray-400 mb-1 block">Wallet Address or ENS</label>
+                    <Input
+                      placeholder="0x... or name.eth"
+                      value={newRecipientAddress}
+                      onChange={(e) => setNewRecipientAddress(e.target.value)}
+                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
+                    />
+                    {isResolvingEns && (
+                      <div className="flex items-center gap-2 mt-2 text-xs text-blue-400">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Resolving ENS
+                      </div>
+                    )}
+                    {resolvedEnsAddress && (
+                      <div className="flex items-center gap-2 mt-2 text-xs text-emerald-400">
+                        <CheckCircle className="h-3 w-3" />
+                        Resolved: <span className="font-mono">{resolvedEnsAddress}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div>
                     <label className="text-xs text-gray-400 mb-1 block">Label</label>
                     <Input
                       placeholder="Recipient label"
                       value={newRecipientLabel}
                       onChange={(e) => setNewRecipientLabel(e.target.value)}
-                      className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
-                    <Input
-                      placeholder="0x742d35Cc6634C0532925a3b8D4C053..."
-                      value={newRecipientAddress}
-                      onChange={(e) => setNewRecipientAddress(e.target.value)}
                       className="bg-gray-900 border-gray-700 text-white placeholder:text-gray-500"
                     />
                   </div>
@@ -292,7 +373,7 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
                   <Button
                     onClick={addRecipient}
                     className="w-full bg-emerald-500 hover:bg-emerald-600 text-black"
-                    disabled={!newRecipientLabel || !newRecipientAddress}
+                    disabled={!newRecipientLabel || (!newRecipientAddress && !resolvedEnsAddress)}
                   >
                     <Plus className="h-4 w-4 mr-2" />
                     Add Recipient
@@ -485,6 +566,78 @@ export function PolicyBuilderScreen({ userENS }: PolicyBuilderScreenProps) {
                   <p className="text-sm text-center text-emerald-300">
                     ✓ Policy ready! Payments will be automatically routed according to your rules.
                   </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Policy Simulator */}
+          <Card className="border-gray-800 bg-gray-900/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Calculator className="h-5 w-5" />
+                Policy Simulator
+              </CardTitle>
+              <p className="text-sm text-gray-400">
+                Test how a payment will be split among your recipients
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <label className="text-xs text-gray-400 block">Simulate Incoming Payment (ETH)</label>
+                <div className="relative">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Enter amount..."
+                    value={simulationAmount}
+                    onChange={(e) => setSimulationAmount(e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white font-mono pl-8"
+                  />
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-500 font-bold">Ξ</span>
+                </div>
+              </div>
+
+              {recipients.length > 0 ? (
+                <div className="space-y-2 bg-gray-800/30 rounded-lg p-3 border border-gray-700/50">
+                  <div className="flex justify-between text-xs text-gray-500 mb-2 uppercase tracking-wider font-semibold">
+                    <span>Recipient</span>
+                    <span>Allocation</span>
+                  </div>
+                  <div className="space-y-2">
+                    {recipients.map((recipient) => {
+                      const amount = (parseFloat(simulationAmount || "0") * recipient.percentage) / 100
+                      return (
+                        <div key={recipient.id} className="flex items-center justify-between group">
+                          <div className="flex flex-col min-w-0 pr-2">
+                            <span className="text-sm text-white font-medium truncate">{recipient.label}</span>
+                            <span className="text-xs text-gray-400 font-mono truncate">
+                              {recipient.address.slice(0, 6)}...{recipient.address.slice(-4)}
+                            </span>
+                          </div>
+                          <div className="text-right flex-shrink-0">
+                            <div className="font-mono font-bold text-emerald-400 text-sm">
+                              {amount.toLocaleString(undefined, { maximumFractionDigits: 6 })} ETH
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {recipient.percentage}%
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  <Separator className="bg-gray-700 my-2" />
+                  <div className="flex justify-between items-center pt-1">
+                    <span className="text-xs text-gray-400">Total Distributed</span>
+                    <span className="font-mono font-bold text-white text-sm">
+                      {((parseFloat(simulationAmount || "0") * totalPercentage) / 100).toLocaleString()} ETH
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500 text-sm italic">
+                  Add recipients to see the simulation
                 </div>
               )}
             </CardContent>

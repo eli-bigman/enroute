@@ -29,7 +29,7 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 flex items-center justify-center">
               <img 
-                src="/enroute-logo.svg" 
+                src="/enroute_logo.png" 
                 alt="EnRoute" 
                 className="w-full h-full"
               />
@@ -84,7 +84,7 @@ export function Navigation({ currentScreen, onScreenChange }: NavigationProps) {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 flex items-center justify-center">
               <img 
-                src="/enroute-logo.svg" 
+                src="/enroute_logo.png" 
                 alt="EnRoute" 
                 className="w-full h-full"
               />
